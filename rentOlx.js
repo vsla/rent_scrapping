@@ -9,12 +9,21 @@ const rentOlx = async(req, res) => {
     // data = $.load(html)
     // console.log($.load("<ul class='list' id='main-ad-list'>...</ul>").length);
     // console.log($.load('big > a', html));
-    const texts = $('.OLXad-list-title', html)
-    console.log(texts[0].children[0].data);
+    const texts = $('.item > .OLXad-list-link > .col-3 > .OLXad-list-price', html)
     
-    res.send(texts[0].children[0].data)
-    // console.log(data.forEach((item) => console.log(item.text())
-    // ))
+    let a = texts.map((i,elem) => {       
+      return {id: i, text: $(elem).text()}
+    });
+
+    // for (let index = 0; index < a.length; index++) {
+    //   const element = a[index];
+    //   console.log(element);
+    // }
+
+    console.log(a.length );
+    
+    res.json({items: a[44]}) 
+
   })
   .catch(function(err){
     //handle error
