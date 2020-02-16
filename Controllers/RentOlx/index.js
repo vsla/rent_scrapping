@@ -1,8 +1,18 @@
 const rp = require("request-promise");
 var $ = require("cheerio");
-const url = "https://pe.olx.com.br/imoveis/venda/apartamentos?ps=400000";
 
 const rentOlx = async (req, res) => {
+  const { location } = req.query;
+  console.log(location);
+  let url = "";
+  if (location) {
+    url = `https://pe.olx.com.br/grande-recife/recife/${location
+      .replace(" ", "-")
+      .toLowerCase()}/imoveis/venda/apartamentos`;
+  } else {
+    url = `https://pe.olx.com.br/grande-recife/recife/imoveis/venda/apartamentos`;
+  }
+
   await rp({ uri: url, encoding: "latin1" })
     .then(function(html) {
       let response = [];
@@ -14,6 +24,10 @@ const rentOlx = async (req, res) => {
       texts.map((i, anounceLine) => {
         let anounce = {};
         // Get image
+
+        anounce.imageLink = $(".image, .lazy", anounceLine.childNodes[1]).attr(
+          "src"
+        );
         // anounceLine.childNodes[1]
 
         // Link to
@@ -48,41 +62,14 @@ const rentOlx = async (req, res) => {
           .text()
           .replace(/(\r\n|\n|\r|\t)/gm, "");
 
-        anounce.inPromotion = !! anounce.oldValue
-
-        // console.log(anounceLine.childNodes[5].childNodes[1].childNodes[0].data);
+        anounce.inPromotion = !!anounce.oldValue;
 
         anounceLine.childNodes[7];
-        // get when rent is anounced
-        index = 0;
+
         response.push(anounce);
       });
 
-      // console.log(texts.children()[2].children);
-      // console.log(Object.keys(texts.children()).length);
-
-      // // Get prices
-      // const prices = $(
-      //   ".item > .OLXad-list-link > .col-3 > .OLXad-list-price",
-      //   html
-      // );
-
-      // prices.map((i, element) => {
-      //   response.push({ id: i, value: $(element).text() });
-      // });
-
-      // // Get names
-
-      // const name = $(
-      //   ".item > .OLXad-list-link > .col-3 > .OLXad-list-price",
-      //   html
-      // );
-
-      // name.map((i, element) => {
-      //   response.push({ id: i, name: $(element).text() });
-      // });
-
-      res.send({ items: response });
+      res.send({ response });
     })
     .catch(function(err) {
       console.log(err);
