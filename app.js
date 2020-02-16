@@ -1,5 +1,5 @@
 const express = require("express");
-const rentOlx = require('./rentOlx')
+const rentOlx = require('./Controllers/RentOlx')
 var app = express();
 
 app.use(express.json());
