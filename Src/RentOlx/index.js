@@ -3,7 +3,7 @@ var $ = require("cheerio");
 
 const rentOlx = async (req, res) => {
   const { location } = req.query;
-  console.log(location);
+
   let url = "";
   if (location) {
     url = `https://pe.olx.com.br/grande-recife/recife/${location
@@ -17,14 +17,14 @@ const rentOlx = async (req, res) => {
     .then(function(html) {
       let response = [];
 
-      const texts = $(".item > .OLXad-list-link", html);
+      const anounces = $(".item > .OLXad-list-link", html);
 
-      // Every card has 4 childs, every column
-
-      texts.map((i, anounceLine) => {
+      anounces.map((i, anounceLine) => {
         let anounce = {};
-        // Get image
+        // anounce id
+        anounce.id = anounceLine.attribs.id;
 
+        // Get image
         anounce.imageLink = $(".image, .lazy", anounceLine.childNodes[1]).attr(
           "src"
         );
