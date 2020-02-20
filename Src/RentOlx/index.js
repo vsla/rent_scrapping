@@ -1,19 +1,91 @@
 const rp = require("request-promise");
 var $ = require("cheerio");
 
-const rentOlx = async (req, res) => {
-  const { location } = req.query;
+const getAreaById = area => {
+  const areas = [0, 30, 60, 90, 120, 150, 180, 200, 250, 300, 400, 500];
 
-  let url = "";
-  if (location) {
-    url = `https://pe.olx.com.br/grande-recife/recife/${location
-      .replace(" ", "-")
-      .toLowerCase()}/imoveis/venda/apartamentos`;
-  } else {
-    url = `https://pe.olx.com.br/grande-recife/recife/imoveis/venda/apartamentos`;
+  return areas[area];
+};
+
+const getUrlByFilters = async queries => {
+  const {
+    location,
+    minp: minPrice,
+    maxp: maxPrice,
+    mins: minSpace,
+    maxs: maxSpace,
+    minbed: minBedRooms,
+    maxbed: maxBedRooms,
+    minba: minBathroom,
+    maxba: maxBathroom,
+    gara: garageAmount,
+    sp: smallPrice,
+    mr: moreRecent,
+    sr: sortRelevant
+  } = queries;
+
+  let url = `https://pe.olx.com.br/grande-recife/recife/imoveis/venda/apartamentos?`;
+  // if (location) {
+  //   url = `https://pe.olx.com.br/grande-recife/recife/${location
+  //     .replace(" ", "-")
+  //     .toLowerCase()}/imoveis/venda/apartamentos`;
+  // } else {
+  //   url = `https://pe.olx.com.br/grande-recife/recife/imoveis/venda/apartamentos`;
+  // }
+
+  if (maxPrice) {
+    url += `pe=${maxPrice}`;
+  }
+  if (minPrice) {
+    url += `ps=${minPrice}`;
+  }
+  if (minSpace) {
+    url += `ss=${getAreaById(minSpace)}`;
+  }
+  if (maxSpace) {
+    url += `se=${getAreaById(maxSpace)}`;
   }
 
-  await rp({ uri: url, encoding: "latin1" })
+  if (minBedRooms) {
+    url += `ros=${minBedRooms}`;
+  }
+  if (maxBedRooms) {
+    url += `roe=${maxBedRooms}`;
+  }
+
+  if (minBathroom) {
+    url += `bas=${minBathroom}`;
+  }
+  if (maxBathroom) {
+    url += `bae=${maxBathroom}`;
+  }
+  if (garageAmount) {
+    url += `gsp=${garageAmount}`;
+  }
+
+  if (moreRecent) {
+    url += `sf=${1}`;
+  } else if (moreRecent) {
+    url += `se=${1}`;
+  } else {
+    if (smallPrice) {
+      url += `sp=${1}`;
+    }
+  }
+
+  console.log(url);
+
+  return url;
+};
+
+const rentOlx = async (req, res) => {
+  const url = getUrlByFilters(req.query);
+
+  await rp({
+    uri:
+      "https://pe.olx.com.br/grande-recife/recife/imoveis/venda/apartamentos",
+    encoding: "latin1"
+  })
     .then(function(html) {
       let response = [];
 
